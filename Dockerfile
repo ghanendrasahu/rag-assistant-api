@@ -7,9 +7,11 @@ ENV PIP_NO_CACHE_DIR=1
 
 WORKDIR /build
 COPY requirements.txt .
+# The dependencies are installed in this stage so the chroma embedding model
+# can be downloaded and cached before the runtime image is assembled.
 RUN pip wheel --wheel-dir /wheels -r requirements.txt \
-    && python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()" \
-    && du -sh /root/.cache/chroma
+    && pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+    && python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()"
 
 FROM python:3.11-slim
 
