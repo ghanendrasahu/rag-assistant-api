@@ -26,7 +26,7 @@ class QueryResponse(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    pdf_path: str = "data/sample.pdf"
+    pdf_path: str = "data/sample_generated.pdf"
     chunk_size: int = Field(default=700, ge=50)
     overlap: int = Field(default=150, ge=0)
 
@@ -112,7 +112,7 @@ def query(request: QueryRequest):
 
 @app.on_event("startup")
 def startup_ingest_default_pdf() -> None:
-    default_pdf = Path("data/sample.pdf")
+    default_pdf = Path("data/sample_generated.pdf")
     if default_pdf.exists():
         ingest_pdf(str(default_pdf))
         log_event("startup_ingest", {"source": str(default_pdf)})
