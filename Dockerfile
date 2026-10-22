@@ -33,7 +33,7 @@ COPY data ./data
 
 # Ship the pre-warmed chroma ONNX embedding cache so the first ingest does
 # not pull 79MB over a slow connection on every restart.
-COPY --from=wheels /root/.cache/chroma /home/appuser/.cache/chroma
+COPY --from=wheels /root/.cache /home/appuser/.cache
 
 RUN useradd --create-home --uid 10001 appuser \
     && mkdir -p /app/data/chroma \
