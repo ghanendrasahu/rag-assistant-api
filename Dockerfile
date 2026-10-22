@@ -7,7 +7,9 @@ ENV PIP_NO_CACHE_DIR=1
 
 WORKDIR /build
 COPY requirements.txt .
-RUN pip wheel --wheel-dir /wheels -r requirements.txt
+RUN pip wheel --wheel-dir /wheels -r requirements.txt \
+    && python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()" \
+    && du -sh /root/.cache/chroma
 
 FROM python:3.11-slim
 
@@ -26,9 +28,13 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.t
 COPY rag_assistant ./rag_assistant
 COPY data ./data
 
+# Ship the pre-warmed chroma ONNX embedding cache so the first ingest does
+# not pull 79MB over a slow connection on every restart.
+COPY --from=wheels /root/.cache/chroma /home/appuser/.cache/chroma
+
 RUN useradd --create-home --uid 10001 appuser \
     && mkdir -p /app/data/chroma \
-    && chown -R appuser:appuser /app
+    && chown -R appuser:appuser /app /home/appuser/.cache
 USER appuser
 
 EXPOSE 7860
