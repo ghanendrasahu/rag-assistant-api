@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["rag_assistant", "tests"]
+
+[tool.ruff.lint]
+# Shared rule set so the local run and CI enforce exactly the same checks.
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

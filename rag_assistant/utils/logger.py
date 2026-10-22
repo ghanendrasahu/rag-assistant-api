@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +10,7 @@ LOG_FILE = Path("logs.jsonl")
 
 def log_event(event_type: str, payload: dict[str, Any], level: str = "INFO") -> None:
     entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "level": level,
         "event_type": event_type,
         "request_id": get_request_id() or None,
