@@ -11,7 +11,8 @@ COPY requirements.txt .
 # can be downloaded and cached before the runtime image is assembled.
 RUN pip wheel --wheel-dir /wheels -r requirements.txt \
     && pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
-    && python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()"
+    && python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()(['warm up the embedding cache'])" \
+    && mkdir -p /root/.cache/chroma
 
 FROM python:3.11-slim
 
