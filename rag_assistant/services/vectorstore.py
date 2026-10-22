@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -8,11 +9,33 @@ import fitz
 from rag_assistant.services.embeddings import get_embedding_function
 
 DEFAULT_COLLECTION = "rag_collection"
+# The collection must survive restarts and be shared between workers, so the
+# store is persistent and lives on a shared volume in deployments.
+DEFAULT_PERSIST_PATH = "data/chroma"
+
+
+def resolve_persist_path(persist_path: str | Path | None = None) -> Path:
+    """Where the persistent Chroma store lives.
+
+    Precedence: explicit argument, then ``CHROMA_PERSIST_PATH``, then the
+    repository-local ``data/chroma`` directory.
+    """
+    if persist_path:
+        return Path(persist_path)
+    configured = os.environ.get("CHROMA_PERSIST_PATH", "").strip()
+    return Path(configured or DEFAULT_PERSIST_PATH)
 
 
 class VectorStoreService:
-    def __init__(self, collection_name: str = DEFAULT_COLLECTION):
-        self.client = chromadb.Client()
+    def __init__(
+        self,
+        collection_name: str = DEFAULT_COLLECTION,
+        persist_path: str | Path | None = None,
+    ):
+        resolved = resolve_persist_path(persist_path)
+        resolved.mkdir(parents=True, exist_ok=True)
+        self.persist_path = resolved
+        self.client = chromadb.PersistentClient(path=str(resolved))
         self.collection = self.client.get_or_create_collection(
             name=collection_name,
             embedding_function=get_embedding_function(),
