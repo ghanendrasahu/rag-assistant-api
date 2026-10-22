@@ -6,3 +6,6 @@ __pycache__/
 *.pyc
 
 .env
+
+# Local build logs
+raglog.txt
